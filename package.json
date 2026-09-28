@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "pnpm -r --filter @mta/content build && pnpm --filter @mta/api build && pnpm --filter @mta/web build",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm --filter @mta/content build && pnpm -r --filter @mta/api --filter @mta/web typecheck && pnpm --filter @mta/content typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "pnpm -r test",

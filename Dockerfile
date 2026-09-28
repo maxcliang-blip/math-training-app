@@ -38,14 +38,16 @@ FROM deps AS build
 WORKDIR /repo
 
 COPY tsconfig.base.json eslint.config.js ./
-COPY .editorconfig ./
 COPY packages/content ./packages/content
 COPY apps/api ./apps/api
 COPY apps/web ./apps/web
 COPY content ./content
 
-RUN pnpm -r typecheck \
+# The root scripts encode the real dependency order (@mta/content must be built
+# before dependents can resolve its types), so the gate runs them, not `pnpm -r`.
+RUN pnpm typecheck \
  && pnpm lint \
+ && pnpm content:lint \
  && pnpm -r test \
  && pnpm build
 
@@ -61,19 +63,25 @@ ENV CONTENT_DIR=/app/content
 
 WORKDIR /app
 
+# pnpm's isolated layout puts each package's dependencies in its *own*
+# node_modules, symlinked into the root .pnpm store. Copying the root
+# node_modules alone leaves `cors`/`express` unresolvable at runtime, so each
+# workspace's node_modules has to come along.
 COPY --from=build --chown=node:node /repo/node_modules ./node_modules
 COPY --from=build --chown=node:node /repo/package.json ./package.json
 COPY --from=build --chown=node:node /repo/packages/content/package.json ./packages/content/package.json
 COPY --from=build --chown=node:node /repo/packages/content/dist ./packages/content/dist
+COPY --from=build --chown=node:node /repo/packages/content/node_modules ./packages/content/node_modules
 COPY --from=build --chown=node:node /repo/apps/api/package.json ./apps/api/package.json
 COPY --from=build --chown=node:node /repo/apps/api/dist ./apps/api/dist
+COPY --from=build --chown=node:node /repo/apps/api/node_modules ./apps/api/node_modules
 COPY --from=build --chown=node:node /repo/content ./content
 
 USER node
 EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 # Workspace protocol links must resolve to the real package dirs.
 ENV NODE_PATH=/app/node_modules
@@ -91,12 +99,21 @@ EXPOSE 80
 # ---------------------------------------------------------------------------
 # all — API behind nginx, built web served from the same origin
 # ---------------------------------------------------------------------------
-FROM nginx:1.27-alpine AS all
+# Based on the Node image rather than the nginx one: this target runs the API
+# in the same container, and the nginx base has no Node runtime at all.
+FROM node:20.11.0-bookworm-slim AS all
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends nginx \
+ && rm -rf /var/lib/apt/lists/* \
+ && rm -f /etc/nginx/sites-enabled/default
 
 COPY --from=build /repo/apps/web/dist /usr/share/nginx/html
 COPY deploy/nginx/all.conf /etc/nginx/conf.d/default.conf
-COPY deploy/entrypoint-all.sh /docker-entrypoint.d/40-mta-all.sh
-RUN chmod +x /docker-entrypoint.d/40-mta-all.sh
+COPY deploy/entrypoint-all.sh /usr/local/bin/entrypoint-all.sh
+RUN chmod +x /usr/local/bin/entrypoint-all.sh
 COPY --from=api /app /opt/mta
 
 EXPOSE 80
+ENTRYPOINT ["/usr/local/bin/entrypoint-all.sh"]
+CMD ["nginx", "-g", "daemon off;"]

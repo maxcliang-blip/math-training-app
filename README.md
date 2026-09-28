@@ -113,8 +113,10 @@ The build stage runs typecheck, lint, tests, and build, so a broken image is a f
 
 ```bash
 docker run --rm -p 3001:3001 math-training-api
-curl localhost:3001/api/health
+curl localhost:3001/health
 ```
+
+Health is served at `/health`; the content routes (`/api/modules`, `/api/lessons`, `/api/exercises`, `/api/practice`, `/api/progress`, `/api/grade`) live under `/api`.
 
 ## Deploy
 

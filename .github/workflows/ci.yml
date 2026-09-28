@@ -113,10 +113,11 @@ jobs:
           cache-to: type=gha,mode=max,scope=api
 
       - name: Smoke test API container
+        # Health is mounted at the root; the content routes live under /api.
         run: |
-          docker run -d --name api-smoke -p 8080:8080 math-training-api:ci
+          docker run -d --name api-smoke -p 18081:3001 math-training-api:ci
           for i in $(seq 1 30); do
-            if curl -fsS http://localhost:8080/api/health; then
+            if curl -fsS http://127.0.0.1:18081/health; then
               echo "API health check passed"
               exit 0
             fi

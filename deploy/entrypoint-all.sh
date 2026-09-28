@@ -1,7 +1,7 @@
 #!/bin/sh
-# Starts the API alongside nginx. Runs from nginx's /docker-entrypoint.d, so
-# output goes to the same logs as the web server and the container fails loudly
-# if the API cannot boot.
+# Single-origin production shape: nginx serves the built web app and proxies
+# /api to the Node process, so the browser never makes a cross-origin request
+# and the app needs no runtime API base URL.
 set -e
 
 export NODE_ENV=production
@@ -10,16 +10,18 @@ export PORT=3001
 export CONTENT_DIR=/opt/mta/content
 export NODE_PATH=/opt/mta/node_modules
 
-echo "starting math-training API on ${HOST}:${PORT}"
-exec node /opt/mta/apps/api/dist/index.js &
+node /opt/mta/apps/api/dist/index.js &
 API_PID=$!
 
-# Give the API a moment to bind so the first proxied request does not 502.
-sleep 1
-
-# exec the original nginx entrypoint logic by replacing this script's process.
-if [ -f /docker-entrypoint.sh ]; then
-  exec /docker-entrypoint.sh "$@"
+# Fail fast and loudly if the API dies at boot, rather than serving a site whose
+# every /api call 502s.
+sleep 2
+if ! kill -0 "$API_PID" 2>/dev/null; then
+  echo "math-training API failed to start" >&2
+  exit 1
 fi
 
-wait "$API_PID"
+# nginx runs in the foreground as PID 1's child; the API dies with it.
+trap 'kill "$API_PID" 2>/dev/null || true' EXIT INT TERM
+
+exec "$@"
