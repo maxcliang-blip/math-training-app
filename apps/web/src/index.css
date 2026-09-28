@@ -1,0 +1,267 @@
+:root {
+  --bg: #ffffff;
+  --fg: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #1d4ed8;
+  --wrong: #b91c1c;
+  --surface: #f9fafb;
+  --radius: 10px;
+  --gap: 1rem;
+  --content-measure: 68ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1020;
+    --fg: #e5e7eb;
+    --muted: #9ca3af;
+    --line: #1f2937;
+    --accent: #93c5fd;
+    --wrong: #fca5a5;
+    --surface: #111827;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.6;
+}
+
+.shell__topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: var(--gap);
+  align-items: center;
+  height: 64px;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.shell__brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.shell__nav {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.shell__nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.shell__nav a:hover,
+.shell__nav a:focus-visible {
+  color: var(--accent);
+}
+
+.shell__breadcrumb {
+  margin: 0 0 0 auto;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.shell__main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.lede {
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.grid--modules {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  list-style: none;
+  padding: 0;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  background: var(--surface);
+}
+
+.card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+
+.tier-row {
+  display: flex;
+  gap: 0.35rem;
+  margin: 0.5rem 0;
+}
+
+.tier {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.lesson-list {
+  display: grid;
+  gap: var(--gap);
+  padding-left: 1.25rem;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filter-bar a {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.1rem 0.7rem;
+  text-decoration: none;
+  color: var(--muted);
+}
+
+.filter-bar a.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.toc ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.lesson__section {
+  max-width: var(--content-measure);
+  margin: 2.5rem 0;
+  scroll-margin-top: 5rem;
+}
+
+.lesson__section h2 {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.3rem;
+  font-size: 1.15rem;
+  text-transform: capitalize;
+}
+
+.callout {
+  border-left: 4px solid var(--accent);
+  padding-left: 1rem;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+}
+
+.worked-example {
+  margin: 0.75rem 0;
+}
+
+.pitfall {
+  border-left: 4px solid var(--wrong);
+  padding: 0.5rem 0 0.5rem 1rem;
+  margin: 1rem 0;
+}
+
+.pitfall__wrong {
+  text-decoration: line-through;
+  color: var(--wrong);
+}
+
+.pitfall__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--muted);
+}
+
+.exercise-list {
+  display: grid;
+  gap: 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.exercise-row__meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Figures reserve their space from `asymptoteAspectRatio` before compiling, so
+   the lesson never reflows when a figure arrives. */
+.figure {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 24rem;
+  margin: 0.75rem 0;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.figure img {
+  max-width: 100%;
+  height: 100%;
+}
+
+.figure--unavailable {
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 0.75rem;
+}
+
+.math-error {
+  color: var(--wrong);
+}
+
+.math-error code {
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}
+
+.empty,
+.error-state {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  color: var(--muted);
+}
+
+.error-state {
+  border-style: solid;
+  color: var(--fg);
+}

@@ -1,0 +1,39 @@
+{
+  "name": "math-training-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter @mta/content build && pnpm --filter @mta/api build && pnpm --filter @mta/web build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "pnpm -r test",
+    "test:coverage": "pnpm -r test:coverage",
+    "dev": "pnpm --parallel --filter @mta/api --filter @mta/web dev",
+    "content:lint": "pnpm --filter @mta/content lint:content",
+    "clean": "pnpm -r exec rm -rf dist .turbo node_modules/.cache"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.17.0",
+    "@types/node": "22.10.2",
+    "eslint": "9.17.0",
+    "eslint-plugin-react-hooks": "5.1.0",
+    "globals": "15.14.0",
+    "typescript": "5.7.2",
+    "typescript-eslint": "8.18.1",
+    "vitest": "2.1.8"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "overrides": {
+      "vite": "5.4.21"
+    }
+  }
+}
