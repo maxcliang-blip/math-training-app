@@ -63,7 +63,10 @@ jobs:
           corepack pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: corepack pnpm -r typecheck
+        # The root script, not `pnpm -r`: @mta/content ships types from dist/,
+        # so it has to be built before the dependents can resolve the contract.
+        # `pnpm -r` runs them concurrently and fails with TS2307 on a clean tree.
+        run: corepack pnpm typecheck
 
       - name: Lint
         run: corepack pnpm lint
